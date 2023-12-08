@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400&display=swap">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+  <style>
+    body {
+      font-family: 'Roboto', sans-serif;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      height: 100vh;
+      background: linear-gradient(45deg, #9575CD, #673AB7, #512DA8);
+      overflow: hidden;
+      color: #fff;
+      transition: background 1s ease;
+      user-select: none;
+    }
+
+    .lang-switch {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      display: flex;
+      gap: 10px;
+    }
+
+    .lang-switch button {
+      background: none;
+      border: none;
+      color: #fff;
+      cursor: pointer;
+      font-size: 16px;
+      outline: none;
+    }
+
+    .lang-switch button:hover {
+      text-decoration: underline;
+    }
+
+    .lang-switch button.active {
+      font-weight: bold;
+      text-decoration: underline;
+    }
+
+    .welcome-text {
+      font-size: 24px;
+      margin-bottom: 20px;
+    }
+
+    .login-container {
+      width: 300px;
+      background-color: rgba(255, 255, 255, 0.2);
+      border-radius: 10px;
+      padding: 20px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+    }
+
+    .login-header {
+      display: flex;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .material-icons {
+      font-size: 36px;
+      margin-right: 10px;
+    }
+
+    .login-form .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-group label {
+      transition: transform 0.3s, font-size 0.3s;
+    }
+
+    .form-group input:focus + label {
+      transform: translateY(-25px) scale(1.2);
+      font-size: 12px;
+    }
+
+    .form-group input:focus ~ input, .form-group input:focus ~ button {
+      opacity: 0.6;
+    }
+
+    .form-group input {
+      background-color: transparent;
+      border: none;
+      border-bottom: 2px solid #fff;
+      color: #fff;
+      padding: 5px;
+      margin-top: 10px;
+      transition: opacity 0.3s;
+      width: 100%;
+      box-sizing: border-box;
+    }
+
+    .form-group button {
+      background-color: #512DA8;
+      color: #fff;
+      padding: 12px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      width: 100%;
+      position: relative;
+      overflow: hidden;
+      transition: background-color 0.3s, transform 0.3s;
+    }
+
+    .form-group button:hover {
+      background-color: #673AB7;
+    }
+
+    .form-group button.shake {
+      animation: shake 0.5s ease-in-out;
+    }
+
+    @keyframes shake {
+      0%, 100% {
+        transform: translateX(0);
+      }
+      10%, 30%, 50%, 70%, 90% {
+        transform: translateX(-5px);
+      }
+      20%, 40%, 60%, 80% {
+        transform: translateX(5px);
+      }
+    }
+
+    .forgot-password a {
+      color: #fff;
+      text-decoration: none;
+      font-size: 14px;
+    }
+
+    .dialog {
+      display: none;
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background-color: rgba(255, 255, 255, 0.8);
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+      z-index: 1000;
+    }
+
+    .dialog-content {
+      text-align: center;
+    }
+
+    .dialog-spinner .spinner {
+      border: 4px solid rgba(255, 255, 255, 0.3);
+      border-radius: 50%;
+      border-top: 4px solid #fff;
+      width: 30px;
+      height: 30px;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .toast {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background-color: #333;
+      color: #fff;
+      padding: 10px;
+      border-radius: 5px;
+      display: none;
+    }
+  </style>
+  <title>Login Page</title>
+</head>
+<body>
+  <div class="lang-switch">
+    <button onclick="changeLanguage('en')" class="active">English</button>
+    <button onclick="changeLanguage('ar')">العربية</button>
+  </div>
+
+  
+
+  <div class="login-container">
+    <div class="login-header">
+      <i class="material-icons">lock</i>
+      <h2 id="login-heading">Login</h2>
+    </div>
+    <div class="login-form">
+      <div class="form-group">
+        <label for="username" id="username-label">Username</label>
+        <input type="text" id="username" name="username" onfocus="showToast(getTranslation('username_hint'))" required>
+      </div>
+      <div class="form-group">
+        <label for="password" id="password-label">Password</label>
+        <input type="password" id="password" name="password" onfocus="showToast(getTranslation('password_hint'))" required>
+      </div>
+      <div class="form-group">
+        <button type="submit" onclick="showDialog()">
+          <span id="login-button">Login</span>
+          <div class="spinner"></div>
+        </button>
+      </div>
+      <div class="form-group forgot-password">
+        
+      </div>
+      <div class="dialog">
+        <div class="dialog-content">
+          
+          <div class="dialog-spinner">
+            <div class="spinner"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  
+
+  <div id="toast" class="toast"></div>
+
+  <script>
+ var translations = {
+      en: {
+        welcome: 'Welcome to NetFollower.com',
+        login: 'Login',
+        username: 'Username',
+        password: 'Password',
+        username_hint: 'Please enter your username',
+        password_hint: 'Please enter your password',
+        forgot_password: 'Forgot Password?',
+        dialog_message: 'Please wait...',
+        made_in: 'Made in Morocco'
+      },
+      ar: {
+        welcome: 'مرحبًا بك في نت فولورر.كوم',
+        login: 'تسجيل الدخول',
+        username: 'اسم المستخدم',
+        password: 'كلمة المرور',
+        username_hint: 'الرجاء إدخال اسم المستخدم الخاص بك',
+        password_hint: 'الرجاء إدخال كلمة المرور الخاصة بك',
+        forgot_password: 'هل نسيت كلمة المرور؟',
+        dialog_message: 'الرجاء الانتظار...',
+        made_in: 'صنع في المغرب'
+      }
+    };
+
+  
+    var currentLanguage = 'en';
+
+    function getTranslation(key) {
+      return translations[currentLanguage][key];
+    }
+
+    function changeLanguage(language) {
+      currentLanguage = language;
+
+      document.getElementById('welcome-text').innerText = getTranslation('welcome');
+      document.getElementById('login-heading').innerText = getTranslation('login');
+      document.getElementById('username-label').innerText = getTranslation('username');
+      document.getElementById('password-label').innerText = getTranslation('password');
+      document.getElementById('forgot-password-link').innerText = getTranslation('forgot_password');
+      document.getElementById('dialog-message').innerText = getTranslation('dialog_message');
+      document.getElementById('made-in').innerText = getTranslation('made_in');
+
+      var langButtons = document.querySelectorAll('.lang-switch button');
+      langButtons.forEach(button => {
+        button.classList.remove('active');
+        if (button.innerText.toLowerCase() === language) {
+          button.classList.add('active');
+        }
+      });
+    }
+
+    function translateText() {
+      document.getElementById('welcome-text').innerText = getTranslation('welcome');
+      document.getElementById('login-heading').innerText = getTranslation('login');
+      document.getElementById('username-label').innerText = getTranslation('username');
+      document.getElementById('password-label').innerText = getTranslation('password');
+      document.getElementById('forgot-password-link').innerText = getTranslation('forgot_password');
+      document.getElementById('dialog-message').innerText = getTranslation('dialog_message');
+      document.getElementById('made-in').innerText = getTranslation('made_in');
+    }
+
+    translateText();
+
+    document.body.style.direction = 'rtl';
+
+    function showToast(message) {
+      var toast = document.getElementById('toast');
+      toast.innerText = message;
+      toast.style.display = 'block';
+      setTimeout(function() {
+        toast.style.display = 'none';
+      }, 3000); 
+    }
+
+    function showDialog() {
+      var username = document.getElementById('username').value;
+      var password = document.getElementById('password').value;
+      var dialog = document.querySelector('.form-group .dialog');
+      var spinner = document.querySelector('.form-group .dialog-spinner .spinner');
+      var loginButton = document.querySelector('.form-group button');
+
+      if (!username || !password) {
+        loginButton.classList.add('shake');
+        setTimeout(function() {
+          var randomX = Math.floor(Math.random() * 50) - 25;
+          var randomY = Math.floor(Math.random() * 50) - 25;
+          loginButton.style.transform = `translate(${randomX}px, ${randomY}px)`;
+          showToast(getTranslation('fill_info'));
+        }, 500);
+        return;
+      }
+
+      dialog.classList.add('visible');
+      spinner.classList.add('visible');
+
+      loginButton.querySelector('span').style.opacity = 0;
+      setTimeout(function() {
+        spinner.classList.remove('visible');
+        loginButton.querySelector('span').style.opacity = 1;
+        dialog.classList.remove('visible');
+        showToast(getTranslation('login_clicked'));
+      }, 2000); 
+    }
+
+    document.body.style.background = 'linear-gradient(45deg, #9575CD, #673AB7, #512DA8)';
+  </script>
+</body>
+</html>
